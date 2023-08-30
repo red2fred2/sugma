@@ -39,7 +39,9 @@ fn main() -> Result<()> {
     let output_triangle = make_triangle(&positions[0], &positions[1], &positions[2]);
 
     println!("Building Matrices");
-    get_transform(input_triangle, output_triangle);
+    let matrix = get_transform(input_triangle, output_triangle);
+
+    println!("Transformation matrix: {matrix:?}");
 
     // Save
     // println!("Saving output image");
@@ -116,15 +118,16 @@ fn pad_matrix(matrix: &Matrix2<f64>) -> Matrix3<f64> {
 }
 
 /// Chops the 3rd dimension off a 3d vector
-fn chop_vector(vector: &Vector3<f64>) -> Vector2<f64> {
-    Vector2::new(vector.x, vector.y)
-}
+// fn chop_vector(vector: &Vector3<f64>) -> Vector2<f64> {
+//     Vector2::new(vector.x, vector.y)
+// }
 
 /// Adds a 3rd dimension 1 to a vector
 fn pad_vector(vector: &Vector2<f64>) -> Vector3<f64> {
     Vector3::new(vector.x, vector.y, 1.0)
 }
 
+/// Gets the transformation matrix to go from an input triangle to output
 fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
     // Find translation matrix
     let translation_vector = output.0 - input.0;
@@ -153,7 +156,40 @@ fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
     .try_inverse()
     .unwrap();
 
+    let unchange_basis_matrix = pad_matrix(&Matrix2::new(
+        output_01.x,
+        output_01_perpendicular.x,
+        output_01.y,
+        output_01_perpendicular.y,
+    ));
+
     let change_basis_matrix = pad_matrix(&change_basis_matrix_2d);
 
-    todo!()
+    // Change triangle bases
+    let m = change_basis_matrix * rotation_matrix * translation_matrix;
+
+    let input_1_in_01 = m * pad_vector(&input.1);
+    let input_2_in_01 = m * pad_vector(&input.2);
+    let output_1_in_01 = m * pad_vector(&output.1);
+    let output_2_in_01 = m * pad_vector(&output.2);
+
+    // Find scale/shear matrix
+    let scale_01 = output_1_in_01.x / input_1_in_01.x;
+    let scale_01_perpendicular = output_2_in_01.y / input_2_in_01.y;
+    let shear_01 = (output_2_in_01.x - input_2_in_01.x * scale_01) / output_2_in_01.y;
+
+    let scale_matrix_2d = Matrix2::new(scale_01, shear_01, 0.0, scale_01_perpendicular);
+    let scale_matrix = pad_matrix(&scale_matrix_2d);
+
+    // Print out
+    println!("Translation matrix: {translation_matrix:?}");
+    println!("Rotation matrix: {rotation_matrix:?}");
+    println!("Change of basis matrix: {change_basis_matrix:?}");
+    println!("Scale/shear matrix {scale_matrix:?}");
+
+    unchange_basis_matrix
+        * scale_matrix
+        * change_basis_matrix
+        * rotation_matrix
+        * translation_matrix
 }
