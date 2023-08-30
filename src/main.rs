@@ -119,5 +119,9 @@ fn pad_vector(vector: Vector2<f64>) -> Vector3<f64> {
 }
 
 fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
+    // Find translation matrix
+    let translation_vector = output.0 - input.0;
+    let translation_matrix = Matrix3::new_translation(&translation_vector);
+
     todo!()
 }
