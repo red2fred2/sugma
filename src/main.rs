@@ -130,5 +130,15 @@ fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
     let translation_vector = output.0 - input.0;
     let translation_matrix = Matrix3::new_translation(&translation_vector);
 
+    // Find rotation matrix
+    let input_01 = input.1 - input.0;
+    let output_01 = output.1 - output.0;
+
+    let input_01_angle = input_01.y.atan2(input_01.x);
+    let output_01_angle = output_01.y.atan2(output_01.x);
+
+    let angle_difference = output_01_angle - input_01_angle;
+    let rotation_matrix = Matrix3::new_rotation(angle_difference);
+
     todo!()
 }
