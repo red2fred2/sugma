@@ -3,7 +3,7 @@
 use anyhow::Result;
 use clap::Parser;
 use image::{io::Reader, ImageBuffer, Rgb};
-use nalgebra::{Matrix3, Vector2};
+use nalgebra::{Matrix2, Matrix3, Vector2, Vector3};
 
 type Image = ImageBuffer<Rgb<u8>, Vec<u8>>;
 type Triangle = (Vector2<f64>, Vector2<f64>, Vector2<f64>);
@@ -26,18 +26,20 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    // Load
     println!("Loading UVs");
     let result = Reader::open(args.input_uv)?;
     let input_image = result.decode()?;
     let input_image = input_image.to_rgb8();
 
-    // Screw with it
-    println!("Screwing with it");
+    println!("Finding Triangles");
     let positions = find_markers(input_image);
     println!("{positions:?}");
 
-    make_triangle(&positions[0], &positions[1], &positions[2]);
+    let input_triangle = make_triangle(&positions[0], &positions[1], &positions[2]);
+    let output_triangle = make_triangle(&positions[0], &positions[1], &positions[2]);
+
+    println!("Building Matrices");
+    get_transform(input_triangle, output_triangle);
 
     // Save
     // println!("Saving output image");
@@ -106,8 +108,10 @@ fn make_triangle(a: &Position, b: &Position, c: &Position) -> Triangle {
     (a, b, c)
 }
 
-fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
-    // let translation = Matrix3::new_translation();
+fn pad_vector(vector: Vector2<f64>) -> Vector3<f64> {
+    Vector3::new(vector.x, vector.y, 1.0)
+}
 
+fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
     todo!()
 }
