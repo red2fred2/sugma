@@ -37,6 +37,8 @@ fn main() -> Result<()> {
     let positions = find_markers(input_image);
     println!("{positions:?}");
 
+    make_triangle(&positions[0], &positions[1], &positions[2]);
+
     // Save
     // println!("Saving output image");
     // let output_image = DynamicImage::from(img).to_rgb8();
@@ -96,7 +98,7 @@ fn get_precedence(pixel: &Rgb<u8>) -> u32 {
     r + 256 * g + 256 * 256 * b
 }
 
-fn make_triangle(a: Position, b: Position, c: Position) -> Triangle {
+fn make_triangle(a: &Position, b: &Position, c: &Position) -> Triangle {
     let a = Vector2::new(a.x as f64, a.y as f64);
     let b = Vector2::new(b.x as f64, b.y as f64);
     let c = Vector2::new(c.x as f64, c.y as f64);
