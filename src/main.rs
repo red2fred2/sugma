@@ -4,6 +4,7 @@ use anyhow::Result;
 use clap::Parser;
 use image::{io::Reader, ImageBuffer, Rgb};
 use nalgebra::{Matrix2, Matrix3, Vector2, Vector3};
+use serde::{Deserialize, Serialize};
 
 type Image = ImageBuffer<Rgb<u8>, Vec<u8>>;
 type Triangle = (Vector2<f64>, Vector2<f64>, Vector2<f64>);
@@ -14,13 +15,19 @@ struct Position {
     y: u32,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct Entry {
+    triangle: Triangle,
+    matrix: Matrix3<f64>,
+}
+
 /// A tool for translating textures to new UV mappings on similar objects
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     input_uv: String,
     output_uv: String,
-    // map_file: String,
+    map_file: String,
 }
 
 fn main() -> Result<()> {
@@ -43,10 +50,16 @@ fn main() -> Result<()> {
 
     println!("Transformation matrix: {matrix:?}");
 
+    let entry = Entry {
+        triangle: input_triangle,
+        matrix,
+    };
+
     // Save
-    // println!("Saving output image");
-    // let output_image = DynamicImage::from(img).to_rgb8();
-    // output_image.save(args.map_file)?;
+    println!("Saving map file");
+    let json_string = serde_json::to_string(&entry)?;
+
+    println!("JSON string:\n{json_string}");
 
     Ok(())
 }
