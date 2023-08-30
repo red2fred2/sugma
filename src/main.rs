@@ -108,12 +108,19 @@ fn make_triangle(a: &Position, b: &Position, c: &Position) -> Triangle {
     (a, b, c)
 }
 
+/// Pads a 2x2 transform matrix to a 3x3 one
 fn pad_matrix(matrix: Matrix2<f64>) -> Matrix3<f64> {
     Matrix3::new(
         matrix.m11, matrix.m12, 0.0, matrix.m21, matrix.m22, 0.0, 0.0, 0.0, 1.0,
     )
 }
 
+/// Chops the 3rd dimension off a 3d vector
+fn chop_vector(vector: Vector3<f64>) -> Vector2<f64> {
+    Vector2::new(vector.x, vector.y)
+}
+
+/// Adds a 3rd dimension 1 to a vector
 fn pad_vector(vector: Vector2<f64>) -> Vector3<f64> {
     Vector3::new(vector.x, vector.y, 1.0)
 }
