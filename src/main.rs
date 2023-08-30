@@ -3,8 +3,10 @@
 use anyhow::Result;
 use clap::Parser;
 use image::{io::Reader, ImageBuffer, Rgb};
+use nalgebra::{Matrix3, Vector2};
 
 type Image = ImageBuffer<Rgb<u8>, Vec<u8>>;
+type Triangle = (Vector2<f64>, Vector2<f64>, Vector2<f64>);
 
 #[derive(Debug)]
 struct Position {
@@ -92,4 +94,18 @@ fn get_precedence(pixel: &Rgb<u8>) -> u32 {
     let b = pixel.0[2] as u32;
 
     r + 256 * g + 256 * 256 * b
+}
+
+fn make_triangle(a: Position, b: Position, c: Position) -> Triangle {
+    let a = Vector2::new(a.x as f64, a.y as f64);
+    let b = Vector2::new(b.x as f64, b.y as f64);
+    let c = Vector2::new(c.x as f64, c.y as f64);
+
+    (a, b, c)
+}
+
+fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
+    // let translation = Matrix3::new_translation();
+
+    todo!()
 }
