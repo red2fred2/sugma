@@ -109,19 +109,19 @@ fn make_triangle(a: &Position, b: &Position, c: &Position) -> Triangle {
 }
 
 /// Pads a 2x2 transform matrix to a 3x3 one
-fn pad_matrix(matrix: Matrix2<f64>) -> Matrix3<f64> {
+fn pad_matrix(matrix: &Matrix2<f64>) -> Matrix3<f64> {
     Matrix3::new(
         matrix.m11, matrix.m12, 0.0, matrix.m21, matrix.m22, 0.0, 0.0, 0.0, 1.0,
     )
 }
 
 /// Chops the 3rd dimension off a 3d vector
-fn chop_vector(vector: Vector3<f64>) -> Vector2<f64> {
+fn chop_vector(vector: &Vector3<f64>) -> Vector2<f64> {
     Vector2::new(vector.x, vector.y)
 }
 
 /// Adds a 3rd dimension 1 to a vector
-fn pad_vector(vector: Vector2<f64>) -> Vector3<f64> {
+fn pad_vector(vector: &Vector2<f64>) -> Vector3<f64> {
     Vector3::new(vector.x, vector.y, 1.0)
 }
 
@@ -139,6 +139,21 @@ fn get_transform(input: Triangle, output: Triangle) -> Matrix3<f64> {
 
     let angle_difference = output_01_angle - input_01_angle;
     let rotation_matrix = Matrix3::new_rotation(angle_difference);
+
+    // Find change of basis matrix
+    let rot_270_matrix = Matrix2::new(0.0, 1.0, 1.0, 0.0);
+    let output_01_perpendicular = rot_270_matrix * output_01;
+
+    let change_basis_matrix_2d = Matrix2::new(
+        output_01.x,
+        output_01_perpendicular.x,
+        output_01.y,
+        output_01_perpendicular.y,
+    )
+    .try_inverse()
+    .unwrap();
+
+    let change_basis_matrix = pad_matrix(&change_basis_matrix_2d);
 
     todo!()
 }
